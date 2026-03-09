@@ -36,7 +36,6 @@
     position: relative;
   }
 
-  /* Animated background grid */
   body::before {
     content: '';
     position: fixed;
@@ -63,7 +62,6 @@
     100% { transform: translate(40px, 40px); }
   }
 
-  /* Demo page layout */
   .demo-page {
     width: 100vw;
     height: 100vh;
@@ -122,7 +120,6 @@
     font-size: 0.85em;
   }
 
-  /* ─── CHAT WIDGET ─── */
   #chat-launcher {
     position: fixed;
     bottom: 2rem;
@@ -161,7 +158,6 @@
   #chat-toggle.open .icon-close { opacity: 1; transform: scale(1) rotate(0deg); }
   #chat-toggle .icon-close { position: absolute; opacity: 0; transform: scale(0.5) rotate(-90deg); }
 
-  /* Notification dot */
   #notif-dot {
     position: absolute;
     top: -2px;
@@ -172,6 +168,7 @@
     border-radius: 50%;
     border: 2px solid var(--bg);
     animation: notifPop 0.4s cubic-bezier(0.34,1.56,0.64,1) both;
+    display: none;
   }
 
   @keyframes notifPop {
@@ -179,7 +176,6 @@
     to { transform: scale(1); }
   }
 
-  /* Chat window */
   #chat-window {
     position: fixed;
     bottom: 6rem;
@@ -206,7 +202,6 @@
     pointer-events: all;
   }
 
-  /* Header */
   .chat-header {
     padding: 1rem 1.2rem;
     background: var(--surface2);
@@ -289,7 +284,6 @@
 
   .chat-close-btn:hover { color: var(--text); background: rgba(255,255,255,0.05); }
 
-  /* Messages */
   #chat-messages {
     flex: 1;
     overflow-y: auto;
@@ -350,7 +344,6 @@
 
   .message.user .msg-time { text-align: right; }
 
-  /* Typing indicator */
   .typing-indicator {
     display: flex;
     align-items: center;
@@ -380,7 +373,6 @@
     30% { transform: translateY(-5px); opacity: 1; }
   }
 
-  /* Success state */
   .lead-success {
     background: linear-gradient(135deg, rgba(0,255,163,0.08), rgba(0,229,255,0.05));
     border: 1px solid rgba(0,255,163,0.2);
@@ -393,7 +385,6 @@
   .lead-success .success-icon { font-size: 1.5rem; margin-bottom: 0.4rem; }
   .lead-success p { font-size: 0.72rem; color: var(--success); line-height: 1.6; }
 
-  /* Input area */
   .chat-input-area {
     padding: 0.9rem 1rem;
     background: var(--surface2);
@@ -443,7 +434,6 @@
   #send-btn:active { transform: scale(0.95); }
   #send-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
 
-  /* Powered by */
   .powered-by {
     text-align: center;
     font-size: 0.6rem;
@@ -454,7 +444,6 @@
 
   .powered-by span { color: var(--accent); }
 
-  /* Config banner */
   .config-banner {
     position: fixed;
     top: 1.5rem;
@@ -479,34 +468,25 @@
 </head>
 <body>
 
-<!-- Demo page background -->
 <div class="demo-page">
   <div class="demo-label">🔴 Live Demo</div>
   <h1 class="demo-title">AI Lead Capture<br/><span>Chatbot Widget</span></h1>
   <p class="demo-sub">
-    Click the chat bubble → bottom right corner.<br/>
-    Replace <code>YOUR_WEBHOOK_URL</code> in the script<br/>
-    with your n8n webhook to go live.
+    Powered by n8n × Groq AI.<br/>
+    Click the chat bubble → bottom right corner.
   </p>
 </div>
 
-<!-- Config warning -->
 <div class="config-banner" id="config-banner">
-  ⚠ Set your n8n webhook URL in the script below to activate
+  ⚠ Set your n8n webhook URL in the script to activate
 </div>
 
-<!-- ═══════════════════════════════════════
-     CHAT WIDGET — copy everything below
-     into any website
-════════════════════════════════════════ -->
 <div id="chat-launcher">
   <div id="notif-dot"></div>
   <button id="chat-toggle" aria-label="Open chat">
-    <!-- Chat icon -->
     <svg class="icon-chat" width="24" height="24" viewBox="0 0 24 24" fill="none">
       <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" fill="white"/>
     </svg>
-    <!-- Close icon -->
     <svg class="icon-close" width="20" height="20" viewBox="0 0 24 24" fill="none">
       <path d="M18 6L6 18M6 6l12 12" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
     </svg>
@@ -514,7 +494,6 @@
 </div>
 
 <div id="chat-window" role="dialog" aria-label="Chat with us">
-  <!-- Header -->
   <div class="chat-header">
     <div class="chat-avatar">⚡</div>
     <div class="chat-header-info">
@@ -528,10 +507,8 @@
     </button>
   </div>
 
-  <!-- Messages -->
   <div id="chat-messages"></div>
 
-  <!-- Input -->
   <div class="chat-input-area">
     <textarea id="chat-input" placeholder="Type a message..." rows="1" aria-label="Message input"></textarea>
     <button id="send-btn" aria-label="Send message">
@@ -546,10 +523,13 @@
 
 <script>
   // ═══════════════════════════════════════
-  // CONFIGURATION — update this URL
+  // CONFIGURATION — your n8n webhook URL
   // ═══════════════════════════════════════
   const WEBHOOK_URL = 'https://oluwaseunsnr.app.n8n.cloud/webhook/lead-chatbot';
   // ═══════════════════════════════════════
+
+  // ⚠ DO NOT CHANGE THIS LINE
+  const PLACEHOLDER = 'YOUR_N8N_WEBHOOK_URL_HERE';
 
   // State
   let isOpen = false;
@@ -568,12 +548,11 @@
   const notifDot = document.getElementById('notif-dot');
   const configBanner = document.getElementById('config-banner');
 
-  // Show config warning if webhook not set
-  if (WEBHOOK_URL === 'https://oluwaseunsnr.app.n8n.cloud/webhook/lead-chatbot') {
+  // Show config warning ONLY if webhook is still the placeholder
+  if (WEBHOOK_URL === PLACEHOLDER) {
     configBanner.style.display = 'block';
   }
 
-  // Open / close
   function openChat() {
     isOpen = true;
     chatWindow.classList.add('open');
@@ -594,7 +573,6 @@
   toggle.addEventListener('click', () => isOpen ? closeChat() : openChat());
   closeBtn.addEventListener('click', closeChat);
 
-  // Helpers
   function getTime() {
     return new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
   }
@@ -606,10 +584,7 @@
   function addBotMessage(text) {
     const wrapper = document.createElement('div');
     wrapper.className = 'message bot';
-    wrapper.innerHTML = `
-      <div class="bubble">${text}</div>
-      <span class="msg-time">${getTime()}</span>
-    `;
+    wrapper.innerHTML = `<div class="bubble">${text}</div><span class="msg-time">${getTime()}</span>`;
     messagesEl.appendChild(wrapper);
     scrollToBottom();
   }
@@ -617,10 +592,7 @@
   function addUserMessage(text) {
     const wrapper = document.createElement('div');
     wrapper.className = 'message user';
-    wrapper.innerHTML = `
-      <div class="bubble">${text}</div>
-      <span class="msg-time">${getTime()}</span>
-    `;
+    wrapper.innerHTML = `<div class="bubble">${text}</div><span class="msg-time">${getTime()}</span>`;
     messagesEl.appendChild(wrapper);
     scrollToBottom();
   }
@@ -634,8 +606,7 @@
         <div class="typing-dot"></div>
         <div class="typing-dot"></div>
         <div class="typing-dot"></div>
-      </div>
-    `;
+      </div>`;
     messagesEl.appendChild(el);
     scrollToBottom();
   }
@@ -650,8 +621,7 @@
     el.className = 'lead-success';
     el.innerHTML = `
       <div class="success-icon">🎉</div>
-      <p>You're all set! Check your inbox for a confirmation.<br/>Our team will reach out within 24 hours.</p>
-    `;
+      <p>You're all set! Check your inbox for a confirmation.<br/>Our team will reach out within 24 hours.</p>`;
     messagesEl.appendChild(el);
     scrollToBottom();
     input.disabled = true;
@@ -659,7 +629,6 @@
     input.placeholder = 'Conversation complete ✓';
   }
 
-  // Send message
   async function sendMessage() {
     const text = input.value.trim();
     if (!text || isLoading || isLeadCaptured) return;
@@ -671,8 +640,8 @@
     sendBtn.disabled = true;
     showTyping();
 
-    // If webhook not configured, use demo mode
-    if (WEBHOOK_URL === 'https://oluwaseunsnr.app.n8n.cloud/webhook/lead-chatbot') {
+    // Demo mode — ONLY triggers if URL is still the placeholder string
+    if (WEBHOOK_URL === PLACEHOLDER) {
       await new Promise(r => setTimeout(r, 1200));
       removeTyping();
       const demoReplies = [
@@ -692,6 +661,7 @@
       return;
     }
 
+    // Live mode — hits your real n8n webhook
     try {
       history.push({ role: 'user', content: text });
 
@@ -704,9 +674,7 @@
       const data = await res.json();
       removeTyping();
 
-      // Update history from response
       if (data.history) history = data.history;
-
       addBotMessage(data.reply);
 
       if (data.isLeadCaptured === true || data.isLeadCaptured === 'true') {
@@ -717,7 +685,7 @@
     } catch (err) {
       removeTyping();
       addBotMessage("Hmm, something went wrong. Please try again in a moment.");
-      history.pop(); // remove failed user message from history
+      history.pop();
     }
 
     isLoading = false;
@@ -725,7 +693,6 @@
     input.focus();
   }
 
-  // Event listeners
   sendBtn.addEventListener('click', sendMessage);
 
   input.addEventListener('keydown', (e) => {
@@ -735,22 +702,15 @@
     }
   });
 
-  // Auto-resize textarea
   input.addEventListener('input', () => {
     input.style.height = 'auto';
     input.style.height = Math.min(input.scrollHeight, 100) + 'px';
   });
 
-  // Auto-open after 3 seconds for demo
   setTimeout(() => {
-    if (!isOpen) {
-      notifDot.style.display = 'block';
-    }
+    if (!isOpen) notifDot.style.display = 'block';
   }, 3000);
 </script>
-<!-- ═══════════════════════════════════════
-     END CHAT WIDGET
-════════════════════════════════════════ -->
 
 </body>
 </html>
